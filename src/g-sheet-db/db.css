@@ -1,0 +1,16 @@
+.cards__container {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+}
+
+.heading {
+	text-align: center;
+}
+.search__container {
+	display: flex;
+	justify-content: center;
+	align-self: center;
+	margin-top: 32px;
+	gap: 10px;
+}

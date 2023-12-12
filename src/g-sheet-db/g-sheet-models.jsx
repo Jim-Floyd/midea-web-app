@@ -1,8 +1,59 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'; // Import Axios
+import Card from '../components/card/card';
+import Cart from '../components/cart/cart';
+import './db.css';
+
+
 
 export default function FetchCSVData() {
     const [csvData, setCsvData] = useState([]);
+    const [cartItems, setCartItems] = useState([]);
+    const onAddItem = item => {
+		const existItem = cartItems.find(c => c.Id == item.Id);
+
+		if (existItem) {
+			const newData = cartItems.map(c =>
+				c.Id == item.Id
+					? { ...existItem, quantity: existItem.quantity + 1 }
+					: c
+			);
+			setCartItems(newData);
+		} else {
+			const newData = [...cartItems, { ...item, quantity: 1 }];
+			setCartItems(newData);
+		}
+	};
+
+	const onRemoveItem = item => {
+		const existItem = cartItems.find(c => c.Id == item.Id);
+
+		if (existItem.quantity === 1) {
+			const newData = cartItems.filter(c => c.Id !== existItem.Id);
+			setCartItems(newData);
+		} else {
+			const newData = cartItems.map(c =>
+				c.Id === existItem.Id
+					? { ...existItem, quantity: existItem.quantity - 1 }
+					: c
+			);
+			setCartItems(newData);
+		}
+	};
+    const [count, setCount] = useState(0);
+    const handleIncrement = () => {
+		setCount(prev => prev + 1);
+		onAddItem(model);
+	};
+
+	const handleDecrement = () => {
+		setCount(prev => prev - 1);
+		onRemoveItem(model);
+	};
+    const onCheckout = () => {
+		telegram.MainButton.text = 'Sotib olish :)';
+		telegram.MainButton.show();
+	};
 
     useEffect(() => {
         fetchCSVData();    // Fetch the CSV data when the component mounts
@@ -36,11 +87,49 @@ export default function FetchCSVData() {
         }
         return data;
     }
-    return csvData.map(model=> {
-      return(
-      <>
-        <p>{model.Id}-{model.type}-{model.brand}-{model.model}-{model.model_num}-{model.cost}</p>
-      </>
-    )}
+    const [searchField, setSearchField] = useState("");
+    
+    const filtered_data = csvData.filter(
+        model => {
+          return (
+            model.model_num.toLowerCase().includes(searchField.toLowerCase())
+          );
+        }
+      );
+    const handleChange = e => {
+    setSearchField(e.target.value);
+    };
+    return (
+        <>
+        <div className="search__container">
+        <input 
+          type = "search" 
+          placeholder = "Search Model" 
+          onChange = {handleChange}
+        />
+        </div>
+        <Cart cartItems={cartItems} onCheckout={onCheckout} />
+        
+        <div className='cards__container'>
+            
+         {filtered_data.map(model=> {
+            return(
+                
+            <>
+            
+                    <Card
+                        key={model.Id}
+                        model={model}
+                        onAddItem={onAddItem}
+                        onRemoveItem={onRemoveItem}
+                    />
+            
+            </>
+                
+            )}
+        )}
+        </div>
+    </>
     )
+    
 }
